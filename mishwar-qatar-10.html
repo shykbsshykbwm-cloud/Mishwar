@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#8A1538">
+<title>مشوار - Mishwar</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--m:#8A1538;--m2:#5e0e27;--g:#C9A24B;--bg:#f5f2f3;--tx:#1d1418;--mut:#7b6d73;--ok:#1f9d55;--rd:#d93a3a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;font-family:'Tajawal',system-ui,sans-serif;color:var(--tx);background:var(--bg);overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:0}
+input,select{font-family:inherit;font-size:16px}
+h3,h4{margin:8px 0}
+.mut{color:var(--mut)}.sm{font-size:13px}.c{text-align:center}
+[hidden]{display:none!important}
+/* auth */
+#auth{position:fixed;inset:0;overflow:auto;background:linear-gradient(160deg,var(--m) 0%,var(--m2) 75%);display:flex;justify-content:center;align-items:flex-start;padding:18px 12px;z-index:3000}
+.card{background:#fff;border-radius:24px;padding:20px;width:100%;max-width:440px;box-shadow:0 20px 50px #0005}
+.card label,.mbox label{display:block;font-weight:700;margin:10px 0 4px;font-size:14px}
+.card input,.mbox input{width:100%;padding:12px;border:2px solid #eadfe3;border-radius:12px;outline:0;background:#fff}
+.card input:focus,.mbox input:focus{border-color:var(--m)}
+.chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.chips button{padding:6px 12px;border-radius:20px;background:#f1e9ec;font-weight:700}
+.chips button.on{background:var(--m);color:#fff}
+.tabs{display:flex;background:#f1e9ec;border-radius:14px;padding:4px;margin:8px 0}
+.tabs button{flex:1;padding:10px;border-radius:11px;background:transparent;font-weight:800;color:var(--mut)}
+.tabs button.on{background:#fff;color:var(--m);box-shadow:0 2px 6px #0002}
+.err{color:var(--rd);font-weight:700;min-height:20px;margin-top:8px;text-align:center}
+.demo{background:#fff6dd;border:1px solid var(--g);border-radius:12px;padding:8px 10px;font-size:12.5px;margin-top:12px}
+.pv{width:64px;height:64px;border-radius:14px;object-fit:cover;background:#eee}
+.upl{display:flex;align-items:center;gap:10px;margin-top:6px}
+/* main */
+#main{position:fixed;inset:0}
+#top{position:absolute;top:0;inset-inline:0;height:56px;background:var(--m);color:#fff;display:flex;align-items:center;gap:8px;padding:0 10px;z-index:1100;box-shadow:0 2px 10px #0004}
+.logo{font-weight:900;font-size:18px;white-space:nowrap}
+.mode{display:flex;background:#0003;border-radius:20px;padding:3px}
+.mode button{background:transparent;color:#fff;padding:6px 14px;border-radius:17px;font-weight:800}
+.mode button.on{background:#fff;color:var(--m)}
+#top select{background:#fff2;color:#fff;border:0;border-radius:10px;padding:6px;font-weight:700}
+#top select option{color:#000}
+.av{width:38px;height:38px;border-radius:50%;padding:0;overflow:hidden;background:#fff;border:2px solid var(--g);flex:none}
+.av img{width:100%;height:100%;object-fit:cover}
+#map{position:absolute;top:56px;bottom:0;inset-inline:0}
+#navchip{position:absolute;top:66px;inset-inline-start:10px;z-index:1010;background:#fff;border-radius:20px;padding:7px 13px;font-weight:800;font-size:13px;box-shadow:0 2px 8px #0003;color:var(--m)}
+#pickb{position:absolute;top:104px;inset-inline:0;margin:auto;width:max-content;max-width:90%;z-index:1010;background:var(--g);color:#000;border-radius:20px;padding:7px 14px;font-weight:800;box-shadow:0 2px 8px #0003}
+#sheet{position:absolute;bottom:0;inset-inline:0;z-index:1050;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -8px 30px #0003;max-height:62vh;overflow:auto;padding:10px 14px calc(14px + env(safe-area-inset-bottom))}
+.grab{width:42px;height:4px;background:#ddd;border-radius:9px;margin:0 auto 10px}
+.fld{display:flex;align-items:center;gap:8px;background:#f4eff1;border-radius:14px;padding:5px 10px;margin-bottom:8px;min-height:46px}
+.fld input{flex:1;border:0;background:transparent;outline:0;min-width:0;padding:6px 0}
+.fv{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.d{width:12px;height:12px;border-radius:50%;flex:none}.d.g{background:var(--ok)}.d.r{background:var(--rd)}
+.ib{background:#fff;border-radius:10px;width:36px;height:36px;font-size:17px;box-shadow:0 1px 3px #0002;flex:none}
+.rs{padding:10px;border-bottom:1px solid #eee;font-size:14px;cursor:pointer}
+.btn{width:100%;padding:14px;border-radius:14px;background:var(--m);color:#fff;font-weight:800;font-size:17px;margin-top:6px;display:block;text-align:center}
+.btn.g{background:var(--ok)}.btn.o{background:#fff;color:var(--m);border:2px solid var(--m)}.btn.r{background:var(--rd)}.btn.wa{background:#25D366}
+.btn:disabled{opacity:.4}.btn.s{padding:9px;font-size:14px;width:auto;display:inline-block}
+.row{display:flex;gap:8px;align-items:stretch}
+.kpi{flex:1;background:#faf6f7;border-radius:14px;padding:9px 4px;text-align:center;font-size:12.5px;color:var(--mut)}
+.kpi b{display:block;font-size:18px;color:var(--m)}
+.drv{display:flex;gap:10px;align-items:center;padding:8px;border:2px solid #eee;border-radius:14px;margin-bottom:6px;cursor:pointer}
+.drv.sel{border-color:var(--m);background:#fff5f8}
+.drv img,.pimg{width:46px;height:46px;border-radius:50%;object-fit:cover;flex:none}
+.box{background:#faf6f7;border-radius:14px;padding:10px;margin:8px 0;line-height:1.9}
+.meter{font-size:46px;font-weight:900;color:var(--m);text-align:center;direction:ltr;line-height:1.1}
+.pill{padding:4px 12px;border-radius:20px;background:#eee;font-weight:800;font-size:13px}.pill.on{background:#d6f5e3;color:var(--ok)}
+.due{display:flex;justify-content:space-between;align-items:center;background:#fff3d6;border:1px solid var(--g);border-radius:14px;padding:10px 12px;margin:8px 0}
+.due b{font-size:20px;color:var(--m)}
+.plate{display:inline-block;background:#fff;border:2px solid #222;border-radius:8px;padding:2px 12px;font-weight:900;letter-spacing:1px;direction:ltr}
+.spin{width:38px;height:38px;border:5px solid #eee;border-top-color:var(--m);border-radius:50%;animation:sp 1s linear infinite;margin:12px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.stars{display:flex;justify-content:center;gap:4px;direction:ltr}
+.stars span{font-size:38px;color:#ddd;cursor:pointer}.stars span.on{color:var(--g)}
+.mk{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid var(--m);font-size:18px;box-shadow:0 2px 6px #0004}
+.mk.me{width:18px;height:18px;background:#2a7be4;border:3px solid #fff;box-shadow:0 0 0 4px #2a7be466}
+.mk.car{border-color:var(--g)}.mk.pk{border-color:var(--ok)}.mk.ds{border-color:var(--rd)}
+/* modal */
+#modal{position:fixed;inset:0;background:#0007;z-index:2000;display:flex;align-items:flex-end;justify-content:center}
+.mbox{background:#fff;border-radius:22px 22px 0 0;padding:16px;width:100%;max-width:480px;max-height:92vh;overflow:auto}
+@media(min-width:600px){#modal{align-items:center}.mbox{border-radius:22px}}
+#toast{position:fixed;bottom:90px;inset-inline:0;margin:auto;width:max-content;max-width:90%;background:#222;color:#fff;padding:10px 16px;border-radius:12px;z-index:5000;display:none;text-align:center}
+.ph{display:flex;align-items:center;gap:12px}
+@media(max-width:430px){.logo span{display:none}}
+</style>
+</head>
+<body>
+<div id="auth" hidden></div>
+<div id="main" hidden>
+  <div id="top"></div>
+  <div id="map"></div>
+  <div id="navchip"></div>
+  <div id="pickb" hidden></div>
+  <div id="sheet"></div>
+</div>
+<div id="modal" hidden></div>
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+'use strict';
+/* =====================  الإعدادات / CONFIG  ===================== */
+const CFG={
+  ADMIN_WA:'97466117536',     // واتساب المدير
+  COMMISSION:0.15,            // عمولة التطبيق 15%
+  // الأجرة لكل دولة في COUNTRIES (base = فتح العداد، km = سعر الكيلو، min = الحد الأدنى)
+  RADIUS_KM:15, REQ_TIMEOUT:90
+};
+/* إعدادات Firebase (مشروع mishwar-8779b) */
+const FB={
+  apiKey:"AIzaSyAJ5NFJyhpTFkdLHHDdPBFkPOTP56uKsj8",
+  // رابط Realtime Database: انسخه من Firebase Console > Realtime Database (أعلى الصفحة). غيّره إذا كان مختلفاً
+  db:"https://mishwar-8779b-default-rtdb.firebaseio.com"
+};
+const AUTH={uid:null,tok:null,ref:localStorage.getItem('fbref')||null,exp:0};
+async function fbPost(url,body,form){
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':form?'application/x-www-form-urlencoded':'application/json'},body:form?body:JSON.stringify(body)});
+  const j=await r.json();if(!r.ok)throw new Error((j.error&&(j.error.message||j.error))||'err');return j;
+}
+function setAuth(j){AUTH.uid=j.localId||j.user_id;AUTH.tok=j.idToken||j.id_token;AUTH.ref=j.refreshToken||j.refresh_token;AUTH.exp=Date.now()+(+(j.expiresIn||j.expires_in)||3600)*1000;try{localStorage.setItem('fbref',AUTH.ref)}catch(e){}}
+async function fbSign(kind,email,pass){setAuth(await fbPost(`https://identitytoolkit.googleapis.com/v1/accounts:${kind}?key=${FB.apiKey}`,{email,password:pass,returnSecureToken:true}))}
+async function fbRefresh(){setAuth(await fbPost(`https://securetoken.googleapis.com/v1/token?key=${FB.apiKey}`,'grant_type=refresh_token&refresh_token='+encodeURIComponent(AUTH.ref),true))}
+/* =====================  الدول / COUNTRIES  ===================== */
+const COUNTRIES={
+  qa:{flag:'🇶🇦',cur:'QAR',code:'qa',b:[[24.35,50.6],[26.25,51.85]],center:[25.3548,51.1839],zoom:9,minZ:8,ph:'5xxxxxxx',
+      fare:{base:3,km:1.2,min:8},name:{ar:'قطر',en:'Qatar',hi:'क़तर',ur:'قطر'}},
+  eg:{flag:'🇪🇬',cur:'EGP',code:'eg',b:[[21.7,24.6],[31.9,36.95]],center:[30.0444,31.2357],zoom:11,minZ:5,ph:'01xxxxxxxxx',
+      fare:{base:8,km:4.5,min:20},name:{ar:'مصر',en:'Egypt',hi:'मिस्र',ur:'مصر'}}
+};
+let CC=localStorage.getItem('cc')||'';
+let C=COUNTRIES[CC]||COUNTRIES.qa;
+const CURS={QAR:{ar:'ر.ق',en:'QAR'},EGP:{ar:'ج.م',en:'EGP'}};
+const curL=(c,ar)=>{const x=CURS[c||'QAR']||CURS.QAR;return(ar||lang==='ar')?x.ar:x.en};
+const cname=k=>COUNTRIES[k].name[lang]||COUNTRIES[k].name.en;
+const sumCur=(a,k)=>{const o={};a.forEach(x=>{const c=x.cur||'QAR';o[c]=(o[c]||0)+(+x[k]||0)});return o};
+const anyPos=o=>!!o&&Object.values(o).some(v=>v>0);
+const mergeCur=(a,b)=>{const o={...a};for(const c in b)o[c]=(o[c]||0)+b[c];return o};
+function fmtCur(o,ar){const e=Object.entries(o||{}).filter(([c,v])=>v>0);return e.length?e.map(([c,v])=>money(v)+' '+curL(c,ar)).join(' + '):money(0)+' '+curL(C.cur,ar)}
+const guessCC=(lat,lng)=>Object.keys(COUNTRIES).find(k=>{const b=COUNTRIES[k].b;return lat>=b[0][0]&&lat<=b[1][0]&&lng>=b[0][1]&&lng<=b[1][1]})||null;
+
+/* =====================  اللغات  ===================== */
+const LANG_ROWS=[
+['app','مشوار','Mishwar','मिशवार','مشوار'],
+['tagline','وصّلني أينما كنت','Ride anywhere you are','कहीं भी राइड','کہیں بھی سواری'],
+['login','دخول','Log in','लॉग इन','لاگ ان'],
+['register','حساب جديد','Sign up','साइन अप','رجسٹر'],
+['email','البريد الإلكتروني','Email','ईमेल','ای میل'],
+['pass','كلمة السر','Password','पासवर्ड','پاس ورڈ'],
+['name','الاسم','Full name','पूरा नाम','پورا نام'],
+['phone','رقم الواتساب','WhatsApp number','व्हाट्सऐप नंबर','واٹس ایپ نمبر'],
+['iamRider','أريد توصيلة','I need rides','मुझे राइड चाहिए','مجھے سواری چاہیے'],
+['iamDriver','أعمل كسائق','I am a driver','मैं ड्राइवर हूँ','میں ڈرائیور ہوں'],
+['plate','رقم السيارة','Car plate number','गाड़ी नंबर','گاڑی نمبر'],
+['carModel','نوع السيارة','Car model','गाड़ी का मॉडल','گاڑی کا ماڈل'],
+['photoMe','صورتك','Your photo','आपकी फोटो','آپ کی تصویر'],
+['photoCar','صورة السيارة','Car photo','गाड़ी की फोटो','گاڑی کی تصویر'],
+['logout','تسجيل خروج','Log out','लॉग आउट','لاگ آؤٹ'],
+['ride','توصيل','Ride','राइड','سواری'],
+['drive','سائق','Drive','ड्राइव','ڈرائیو'],
+['profile','ملفي الشخصي','My profile','प्रोफ़ाइल','پروفائل'],
+['save','حفظ','Save','सेव','محفوظ کریں'],
+['pickup','مكان الانطلاق','Pickup','पिकअप','پک اپ'],
+['myLoc','موقعي الحالي','My location','मेरी लोकेशन','میری لوکیشن'],
+['tapMap','اضغط على الخريطة لتحديد الموقع','Tap the map to choose a spot','लोकेशन चुनने के लिए मैप दबाएँ','مقام منتخب کرنے کے لیے نقشے پر ٹیپ کریں'],
+['search','إلى أين؟ ابحث عن مكان في قطر…','Where to? Search a place in Qatar…','कहाँ जाना है? क़तर में खोजें…','کہاں جانا ہے؟ قطر میں تلاش کریں…'],
+['distance','المسافة','Distance','दूरी','فاصلہ'],
+['time','الوقت','Time','समय','وقت'],
+['fare','الأجرة','Fare','किराया','کرایہ'],
+['qar','ر.ق','QAR','QAR','QAR'],
+['km','كم','km','किमी','کلومیٹر'],
+['min','دقيقة','min','मिनट','منٹ'],
+['cashOnly','الدفع نقداً للسائق عند الوصول فقط','Cash to the driver on arrival only','केवल पहुँचकर ड्राइवर को नकद','صرف پہنچ کر ڈرائیور کو نقد'],
+['nearby','سائقون قريبون منك','Drivers near you','आपके पास के ड्राइवर','آپ کے قریبی ڈرائیور'],
+['noDrivers','لا يوجد سائقون متاحون قريباً الآن، سنحدّث القائمة تلقائياً','No drivers nearby right now, list refreshes automatically','अभी पास में कोई ड्राइवर नहीं','ابھی قریب کوئی ڈرائیور نہیں'],
+['request','اطلب السيارة','Request ride','राइड बुक करें','سواری بُک کریں'],
+['cancel','إلغاء','Cancel','रद्द करें','منسوخ'],
+['back','رجوع','Back','वापस','واپس'],
+['waiting','بانتظار قبول السائق…','Waiting for the driver to accept…','ड्राइवर के स्वीकार करने का इंतज़ार…','ڈرائیور کے قبول کرنے کا انتظار…'],
+['accepted','السائق قبل طلبك وهو في الطريق إليك','Driver accepted and is on the way','ड्राइवर रास्ते में है','ڈرائیور راستے میں ہے'],
+['arrived','السائق وصل إلى موقعك','Your driver has arrived','ड्राइवर पहुँच गया','ڈرائیور پہنچ گیا'],
+['started','المشوار بدأ — العداد يعمل','Trip started — meter running','सफ़र शुरू — मीटर चालू','سفر شروع — میٹر چالو'],
+['done','وصلت بسلامة!','You have arrived!','आप पहुँच गए!','آپ پہنچ گئے!'],
+['payCash','ادفع للسائق نقداً','Pay the driver in cash','ड्राइवर को नकद दें','ڈرائیور کو نقد ادا کریں'],
+['rate','قيّم السائق','Rate your driver','ड्राइवर को रेट करें','ڈرائیور کو ریٹ کریں'],
+['submit','إرسال','Submit','भेजें','بھیجیں'],
+['skip','تخطي','Skip','छोड़ें','چھوڑیں'],
+['declined','السائق لم يقبل الطلب، اختر سائقاً آخر','The driver did not accept. Choose another','ड्राइवर ने स्वीकार नहीं किया','ڈرائیور نے قبول نہیں کیا'],
+['navTitle','اختر خريطة الملاحة','Choose your map app','मैप ऐप चुनें','نقشہ ایپ منتخب کریں'],
+['navHint','عند ضغط "ابدأ المشوار" تُفتح الخريطة المختارة تلقائياً. يمكنك تغييرها في أي وقت.','"Start trip" opens your chosen app automatically. You can change it anytime.','"सफ़र शुरू" दबाने पर चुना ऐप खुलेगा। कभी भी बदल सकते हैं।','"سفر شروع" پر منتخب ایپ کھلے گی۔ کبھی بھی بدل سکتے ہیں۔'],
+['navHere','هنا (داخل التطبيق)','Here (inside this app)','यहीं (इस ऐप में)','یہیں (اسی ایپ میں)'],
+['navGoogle','خرائط قوقل','Google Maps','Google Maps','Google Maps'],
+['navWaze','ويز Waze','Waze','Waze','Waze'],
+['navPetal','خرائط هواوي Petal','Petal Maps (Huawei)','Petal Maps (Huawei)','Petal Maps (Huawei)'],
+['navTo','افتح الملاحة','Open navigation','नेविगेशन खोलें','نیویگیشن کھولیں'],
+['goOnline','ابدأ استقبال الطلبات','Go online','ऑनलाइन हों','آن لائن ہوں'],
+['goOffline','إيقاف الاستقبال','Go offline','ऑफ़लाइन हों','آف لائن ہوں'],
+['online','متصل','Online','ऑनलाइन','آن لائن'],
+['offline','غير متصل','Offline','ऑफ़लाइन','آف لائن'],
+['waitReq','بانتظار طلبات الركاب…','Waiting for ride requests…','राइड अनुरोध का इंतज़ार…','سواری کی درخواستوں کا انتظار…'],
+['newReq','طلب جديد!','New request!','नया अनुरोध!','نئی درخواست!'],
+['accept','قبول','Accept','स्वीकार','قبول'],
+['decline','رفض','Decline','अस्वीकार','مسترد'],
+['toRider','توجّه إلى موقع الراكب','Head to the rider','राइडर के पास जाएँ','سواری کے پاس جائیں'],
+['iArrived','وصلت للراكب','I have arrived','मैं पहुँच गया','میں پہنچ گیا'],
+['startTrip','ابدأ المشوار','Start trip','सफ़र शुरू करें','سفر شروع کریں'],
+['endTrip','إنهاء المشوار','End trip','सफ़र खत्म करें','سفر ختم کریں'],
+['meter','العداد','Meter','मीटर','میٹر'],
+['collect','استلم المبلغ من الراكب نقداً','Collect the cash from the rider','राइडर से नकद लें','سواری سے نقد وصول کریں'],
+['commission','عمولة التطبيق 15٪','App commission 15%','ऐप कमीशन 15%','ایپ کمیشن 15%'],
+['net','صافي ربحك','Your net','आपकी कमाई','آپ کی آمدنی'],
+['reportWa','أرسل تقرير المشوار للمدير (واتساب)','Send trip report to manager (WhatsApp)','मैनेजर को रिपोर्ट भेजें (WhatsApp)','منیجر کو رپورٹ بھیجیں (واٹس ایپ)'],
+['unrep','مشاوير لم يُرسل تقريرها للمدير','Trips not yet reported to manager','मैनेजर को न भेजी गई रिपोर्ट','منیجر کو نہ بھیجی گئی رپورٹس'],
+['weekTitle','حسابك هذا الأسبوع','Your week','इस हफ़्ते','اس ہفتے'],
+['trips','مشاوير','Trips','ट्रिप','سفر'],
+['earned','المكتسب','Earned','कमाई','کمائی'],
+['due','العمولة المطلوبة منك','Commission you owe','आप पर बकाया कमीशन','آپ پر واجب کمیشن'],
+['payComm','ادفع العمولة (واتساب المدير)','Pay commission (manager WhatsApp)','कमीशन चुकाएँ (WhatsApp)','کمیشن ادا کریں (واٹس ایپ)'],
+['weekly','تذكير أسبوعي: حان وقت دفع عمولة 15٪ للتطبيق. تواصل مع المدير على واتساب.','Weekly reminder: time to pay the 15% app commission. Contact the manager on WhatsApp.','साप्ताहिक रिमाइंडर: 15% कमीशन चुकाने का समय। मैनेजर से WhatsApp पर संपर्क करें।','ہفتہ وار یاد دہانی: 15% کمیشن ادا کرنے کا وقت۔ منیجر سے واٹس ایپ پر رابطہ کریں۔'],
+['contactAdmin','تواصل مع المدير (واتساب)','Contact manager (WhatsApp)','मैनेजर से संपर्क (WhatsApp)','منیجر سے رابطہ (واٹس ایپ)'],
+['later','لاحقاً','Later','बाद में','بعد میں'],
+['becomeDriver','اشتغل كسائق','Work as a driver','ड्राइवर बनें','ڈرائیور بنیں'],
+['changePhoto','تغيير الصورة','Change photo','फोटो बदलें','تصویر بدلیں'],
+['fillAll','أكمل جميع الحقول المطلوبة (والصور للسائق)','Please fill all required fields (and photos for drivers)','सभी ज़रूरी फ़ील्ड भरें','تمام ضروری خانے پُر کریں'],
+['badLogin','البريد أو كلمة السر غير صحيحة','Wrong email or password','गलत ईमेल या पासवर्ड','غلط ای میل یا پاس ورڈ'],
+['emailUsed','هذا البريد مسجل مسبقاً','Email already registered','ईमेल पहले से पंजीकृत','ای میل پہلے سے رجسٹر ہے'],
+['badEmail','البريد الإلكتروني غير صحيح','Invalid email','अमान्य ईमेल','غلط ای میل'],
+['badPass','كلمة السر 6 أحرف على الأقل','Password must be 6+ characters','पासवर्ड कम से कम 6 अक्षर','پاس ورڈ کم از کم 6 حروف'],
+['badPhone','رقم الواتساب غير صحيح','Invalid WhatsApp number','अमान्य नंबर','غلط نمبر'],
+['noGps','تعذر تحديد موقعك. فعّل الـGPS أو اضغط على الخريطة','Cannot get your location. Enable GPS or tap the map','लोकेशन नहीं मिली। GPS चालू करें','لوکیشن نہیں ملی۔ جی پی ایس آن کریں'],
+['outQatar','هذا الموقع خارج الدولة المختارة','This spot is outside the selected country','यह जगह चुने देश के बाहर है','یہ مقام منتخب ملک سے باہر ہے'],
+['country','الدولة','Country','देश','ملک'],
+['detectQ','يبدو أنك الآن في','You seem to be in','आप अभी यहाँ लगते हैं','آپ اس وقت یہاں لگتے ہیں'],
+['switchTo','التبديل إلى','Switch to','बदलें','تبدیل کریں'],
+['stay','البقاء','Stay','यहीं रहें','یہیں رہیں'],
+['call','اتصال','Call','कॉल','کال'],
+['whatsapp','واتساب','WhatsApp','WhatsApp','واٹس ایپ'],
+['newRider','لا تقييمات بعد','No ratings yet','अभी रेटिंग नहीं','ابھی ریٹنگ نہیں'],
+['localMode','وضع تجريبي: البيانات محفوظة على هذا الجهاز فقط. اربط قاعدة Firebase في الإعدادات ليعمل التطبيق بين أجهزة الركاب والسائقين.','Demo mode: data stays on this device only. Connect Firebase in CFG so riders and drivers can see each other across devices.'],
+['pickMap','حدد على الخريطة','Pick on map','मैप पर चुनें','نقشے پر منتخب کریں'],
+['netErr','تعذر الاتصال، حاول مرة أخرى','Connection problem, try again','कनेक्शन समस्या','کنیکشن کا مسئلہ'],
+['driverLbl','السائق','Driver','ड्राइवर','ڈرائیور'],
+['riderLbl','الراكب','Rider','राइडर','سواری'],
+['riderCancelled','الراكب ألغى الطلب','The rider cancelled','राइडर ने रद्द किया','سواری نے منسوخ کیا'],
+['busyTrip','أنهِ المشوار الحالي أولاً','Finish the current trip first','पहले मौजूदा सफ़र खत्म करें','پہلے موجودہ سفر ختم کریں'],
+['estimated','تقريبي','Approx.','अनुमानित','تخمینی'],
+['admin','لوحة المدير','Manager panel','मैनेजर पैनल','منیجر پینل'],
+['pin','رمز المدير','Manager PIN','मैनेजर पिन','منیجر پن'],
+['settle','تم استلام العمولة','Commission received','कमीशन मिला','کمیشن وصول'],
+['remind','تذكير واتساب','WhatsApp reminder','WhatsApp रिमाइंडर','واٹس ایپ یاد دہانی'],
+['noData','لا توجد بيانات بعد','No data yet','अभी डेटा नहीं','ابھی ڈیٹا نہیں'],
+['driverTrip','مشوار','Trip','सफ़र','سفر'],
+['sent','تم','Done','हो गया','ہو گیا'],
+['navBg','الملاحة تعمل في تطبيق آخر؟ عند الوصول ارجع لهذا التطبيق واضغط "إنهاء المشوار". يُحسب العداد على الطريق الفعلي ويصل للراكب.','Navigating in another app? When you arrive, come back here and press "End trip". The meter counts the real road distance.','दूसरे ऐप में नेविगेशन? पहुँचकर यहाँ लौटें और "सफ़र खत्म करें" दबाएँ। मीटर असली सड़क दूरी गिनता है।','دوسری ایپ میں نیویگیشن؟ پہنچ کر یہاں واپس آئیں اور "سفر ختم کریں" دبائیں۔ میٹر اصل سڑک کا فاصلہ گنتا ہے۔'],
+['shortNote','الأجرة تُحسب على أقصر طريق بين نقطة البداية والنهاية، فلا يدفع الراكب مقابل التفاف أو زحمة ولا يخسر السائق.','The fare is based on the shortest road between start and end, so riders do not pay for detours or traffic.','किराया शुरू और अंत के बीच सबसे छोटे रास्ते से तय होता है, चक्कर या ट्रैफ़िक का पैसा नहीं।','کرایہ شروع اور اختتام کے درمیان مختصر ترین راستے سے طے ہوتا ہے، چکر یا ٹریفک کا نہیں۔'],
+['phoneRider','رقم الهاتف','Phone number','फ़ोन नंबर','فون نمبر'],
+['weekEnd','انتهى الأسبوع 📊 أرسل للمدير تقريرك: اسمك وبريدك وواتساب والعمولة المطلوبة منك.','Week ended 📊 Send the manager your report: name, email, WhatsApp and the commission you owe.','हफ़्ता खत्म 📊 मैनेजर को रिपोर्ट भेजें: नाम, ईमेल, WhatsApp और बकाया कमीशन।','ہفتہ ختم 📊 منیجر کو رپورٹ بھیجیں: نام، ای میل، واٹس ایپ اور واجب کمیشن۔'],
+['weekSend','أرسل التقرير الأسبوعي للمدير (واتساب)','Send weekly report to manager (WhatsApp)','साप्ताहिक रिपोर्ट भेजें (WhatsApp)','ہفتہ وار رپورٹ بھیجیں (واٹس ایپ)'],
+['adminWeekly','تقرير أسبوعي شامل لكل السائقين','Weekly report for all drivers','सभी ड्राइवरों की साप्ताहिक रिपोर्ट','تمام ڈرائیوروں کی ہفتہ وار رپورٹ']
+];
+const TR={};LANG_ROWS.forEach(r=>TR[r[0]]={ar:r[1],en:r[2],hi:r[3],ur:r[4]});
+let lang=localStorage.getItem('lang')||'ar';
+const t=k=>{if(k==='qar')return curL(C.cur);const r=TR[k];return r?(r[lang]||r.en||r.ar||k):k};
+function applyLang(){document.documentElement.lang=lang;document.documentElement.dir=(lang==='ar'||lang==='ur')?'rtl':'ltr'}
+
+/* =====================  أدوات  ===================== */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PH='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" fill="#e9dfe3"/><circle cx="24" cy="18" r="9" fill="#b9a3ac"/><path d="M6 48c2-12 10-17 18-17s16 5 18 17z" fill="#b9a3ac"/></svg>');
+const money=n=>(+n||0).toFixed(2);
+const hav=(a,b)=>{const R=6371,r=x=>x*Math.PI/180,dl=r(b.lat-a.lat),dn=r(b.lng-a.lng);const h=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+const inQ=(lat,lng)=>lat>=C.b[0][0]&&lat<=C.b[1][0]&&lng>=C.b[0][1]&&lng<=C.b[1][1];
+const calcFare=km=>Math.ceil(Math.max(C.fare.min,C.fare.base+km*C.fare.km)*2)/2;
+const uid8=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const ekey=e=>e.replace(/[.#$\[\]\/]/g,',');
+const ll=(a,b)=>a.toFixed(4)+', '+b.toFixed(4);
+const shortName=s=>String(s||'').split(',').slice(0,3).join(', ').trim();
+function normPhone(p){let d=String(p).replace(/\D/g,'');if(d.startsWith('00'))d=d.slice(2);if(CC==='eg'||C.code==='eg'){if(d.length===11&&d[0]==='0')d='20'+d.slice(1);else if(d.length===10&&d[0]==='1')d='20'+d}else if(d.length===8)d='974'+d;return d.length>=10&&d.length<=15?d:''}
+const waLink=(p,m)=>'https://wa.me/'+p+'?text='+encodeURIComponent(m);
+const avg=u=>u&&u.rCount?(u.rSum/u.rCount):0;
+const starsTxt=u=>u&&u.rCount?'★ '+avg(u).toFixed(1)+' ('+u.rCount+')':t('newRider');
+function toast(m){const e=$('#toast');e.textContent=m;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3200)}
+async function hash(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('mishwar|'+s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){let h=5381;for(const c of s)h=((h<<5)+h+c.charCodeAt(0))>>>0;return'x'+h}}
+function readImg(file,max=360){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.72))};im.onerror=rej;im.src=r.result};r.onerror=rej;r.readAsDataURL(file)})}
+function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();[0,.25,.5].forEach(d=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.value=.2;o.connect(g);g.connect(c.destination);o.start(c.currentTime+d);o.stop(c.currentTime+d+.15)});navigator.vibrate&&navigator.vibrate([300,100,300])}catch(e){}}
+function weekStart(d=new Date()){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+1)%7));return x} // الأسبوع يبدأ السبت
+const sumBy=(a,k)=>a.reduce((s,x)=>s+(+x[k]||0),0);
+
+/* =====================  قاعدة البيانات (محلي أو Firebase)  ===================== */
+const DB=(()=>{
+  let rp=null;
+  const fresh=async()=>{if(!AUTH.ref||!AUTH.tok)throw new Error('noauth');if(Date.now()>AUTH.exp-120000){rp=rp||fbRefresh().finally(()=>{rp=null});await rp}};
+  const CANDS=['https://mishwar-8779b-default-rtdb.firebaseio.com','https://mishwar-8779b-default-rtdb.europe-west1.firebasedatabase.app','https://mishwar-8779b-default-rtdb.asia-southeast1.firebasedatabase.app'];
+  const raw=(base,m,p,b)=>fetch(`${base}/${p}.json?auth=${AUTH.tok}`,{method:m,body:b===undefined?undefined:JSON.stringify(b)});
+  async function f(m,p,b){
+    await fresh();
+    let r=await raw(FB.db,m,p,b).catch(()=>null);
+    if(!r||r.status===404){   // رابط/منطقة قاعدة البيانات غير صحيحة: جرّب باقي المناطق وثبّت الصحيح
+      for(const c of CANDS){if(c===FB.db)continue;const x=await raw(c,m,p,b).catch(()=>null);if(x&&x.status!==404){FB.db=c;r=x;break}}
+    }
+    if(!r)throw new Error('Failed to fetch');
+    if(!r.ok)throw new Error('db '+r.status);
+    return r.json();
+  }
+  return{cloud:true,get:p=>f('GET',p),set:(p,v)=>f('PUT',p,v),patch:(p,v)=>f('PATCH',p,v),del:p=>f('DELETE',p)};
+})();
+
+/* =====================  الحالة  ===================== */
+const S={user:null,mode:'ride',pos:null,nav:localStorage.getItem('nav')||'',
+  rider:{phase:'plan',pickup:null,dest:null,pickMode:null,route:null,fare:0,drivers:[],sel:null,req:null,q:null,results:[],qtext:'',stars:0,sig:''}};
+const D={online:false,phase:'idle',req:null,q:null,inc:null,meter:null,stats:null,trip:null,sig:''};
+const photoCache={};
+const M={map:null,mk:{},route:null,drv:null,centered:false};
+
+/* =====================  الدخول والتسجيل  ===================== */
+let AT='login',AR='rider',AP={};
+function langChips(){return['ar:العربية','en:English','hi:हिन्दी','ur:اردو'].map(x=>{const[k,n]=x.split(':');return`<button class="${lang===k?'on':''}" onclick="setLang('${k}')">${n}</button>`}).join('')}
+function countryChips(){return Object.keys(COUNTRIES).map(k=>`<button class="${C.code===k?'on':''}" onclick="setCountry('${k}')">${COUNTRIES[k].flag} ${cname(k)}</button>`).join('')}
+function setLang(l){lang=l;localStorage.setItem('lang',l);applyLang();if(S.user){renderTop();renderSheet()}else authView()}
+function authView(){
+  $('#auth').hidden=false;$('#main').hidden=true;
+  const login=`<label>${t('email')}</label><input id="a_email" type="email" autocomplete="username" dir="ltr">
+   <label>${t('pass')}</label><input id="a_pass" type="password" autocomplete="current-password" dir="ltr">
+   <button class="btn" onclick="doLogin()">${t('login')}</button>`;
+  const reg=`<div class="tabs"><button id="rr" class="${AR==='rider'?'on':''}" onclick="setRole('rider')">${t('iamRider')}</button><button id="rd" class="${AR==='driver'?'on':''}" onclick="setRole('driver')">${t('iamDriver')}</button></div>
+   <label>${t('name')}</label><input id="r_name">
+   <label id="lph">${AR==='driver'?t('phone'):t('phoneRider')}</label><input id="r_phone" inputmode="tel" placeholder="${C.ph}" dir="ltr">
+   <label>${t('email')}</label><input id="r_email" type="email" dir="ltr">
+   <label>${t('pass')}</label><input id="r_pass" type="password" dir="ltr">
+   <div id="dfields" style="display:${AR==='driver'?'block':'none'}">
+     <label>${t('plate')}</label><input id="r_plate" dir="ltr">
+     <label>${t('carModel')}</label><input id="r_model">
+     <div class="upl"><img class="pv" id="pv_me" src="${AP.me||PH}"><label class="btn o s" style="margin:0">${t('photoMe')}<input type="file" accept="image/*" hidden onchange="authPhoto(this,'me')"></label></div>
+     <div class="upl"><img class="pv" id="pv_car" src="${AP.car||PH}"><label class="btn o s" style="margin:0">${t('photoCar')}<input type="file" accept="image/*" hidden onchange="authPhoto(this,'car')"></label></div>
+   </div>
+   <button class="btn" onclick="doRegister()">${t('register')}</button>`;
+  $('#auth').innerHTML=`<div class="card"><div class="c"><div style="font-size:52px">🚖</div><h1 style="margin:0;color:var(--m)">${t('app')}</h1><div class="mut">${t('tagline')}</div></div>
+   <div class="chips">${langChips()}</div><div class="chips">${countryChips()}</div>
+   <div class="tabs"><button class="${AT==='login'?'on':''}" onclick="AT='login';authView()">${t('login')}</button><button class="${AT==='reg'?'on':''}" onclick="AT='reg';authView()">${t('register')}</button></div>
+   ${AT==='login'?login:reg}<div id="aerr" class="err"></div>
+   </div>`;
+}
+function setRole(r){AR=r;$('#lph').textContent=r==='driver'?t('phone'):t('phoneRider');$('#dfields').style.display=r==='driver'?'block':'none';$('#rr').className=r==='rider'?'on':'';$('#rd').className=r==='driver'?'on':''}
+async function authPhoto(inp,k){if(!inp.files[0])return;AP[k]=await readImg(inp.files[0]);$('#pv_'+k).src=AP[k]}
+const aerr=m=>{$('#aerr').textContent=m};
+async function loadUser(uid){const[a,b]=await Promise.all([DB.get('users/'+uid),DB.get('profiles/'+uid)]);return a?{...a,...(b||{}),id:uid}:null}
+function authErr(m){
+  if(/EMAIL_EXISTS/.test(m))return t('emailUsed');
+  if(/WEAK_PASSWORD/.test(m))return t('badPass');
+  if(/INVALID_EMAIL/.test(m))return t('badEmail');
+  if(/INVALID_LOGIN|EMAIL_NOT_FOUND|INVALID_PASSWORD|INVALID_CREDENTIAL/.test(m))return t('badLogin');
+  if(/OPERATION_NOT_ALLOWED/.test(m))return 'فعّل Email/Password في Firebase Authentication';
+  if(/TOO_MANY/.test(m))return 'محاولات كثيرة، انتظر قليلاً';
+  if(/db 40[13]/.test(m))return 'خطأ صلاحيات قاعدة البيانات ('+m+'): تأكد من نشر القواعد (Publish) في Realtime Database > Rules';
+  if(/db 404|Failed to fetch|NetworkError|Load failed/i.test(m))return 'تعذر الوصول لقاعدة البيانات ('+m+'): تأكد أنك أنشأت Realtime Database وأن رابطها في FB.db صحيح';
+  if(/API_KEY|API key|PERMISSION_DENIED|referer/i.test(m))return 'مفتاح Firebase مرفوض ('+m+'): افحص قيود مفتاح API في Google Cloud';
+  return t('netErr')+' ['+m+']';
+}
+async function doRegister(){
+  try{
+    const v=id=>($('#'+id)?$('#'+id).value.trim():'');
+    const email=v('r_email').toLowerCase(),pass=$('#r_pass').value,name=v('r_name'),phone=normPhone(v('r_phone')),drv=AR==='driver';
+    if(!name||!v('r_phone')||!email||!pass)return aerr(t('fillAll'));
+    if(!/^[^\s@'"<>]+@[^\s@'"<>]+\.[^\s@'"<>]+$/.test(email))return aerr(t('badEmail'));
+    if(pass.length<6)return aerr(t('badPass'));
+    if(!phone)return aerr(t('badPhone'));
+    if(drv&&(!v('r_plate')||!AP.me||!AP.car))return aerr(t('fillAll'));
+    try{await fbSign('signUp',email,pass)}catch(e){
+      if(/EMAIL_EXISTS/.test(String(e.message))){
+        try{await fbSign('signInWithPassword',email,pass)}catch(_){return aerr(t('emailUsed'))}
+        if(await DB.get('users/'+AUTH.uid))return aerr(t('emailUsed'));   // مسجل كاملاً فعلاً
+      }else throw e;
+    }
+    const id=AUTH.uid;
+    const us={email,phone,isDriver:drv,createdAt:Date.now()};
+    const pr={name,rSum:0,rCount:0};if(AP.me)pr.photo=AP.me;
+    if(drv){pr.plate=v('r_plate').toUpperCase();pr.model=v('r_model');pr.carPhoto=AP.car}
+    await DB.set('users/'+id,us);await DB.set('profiles/'+id,pr);
+    S.mode=drv?'drive':'ride';S.user={...us,...pr,id};enter();
+  }catch(e){aerr(authErr(String(e.message||e)))}
+}
+async function doLogin(){
+  try{
+    const email=$('#a_email').value.trim().toLowerCase(),pass=$('#a_pass').value;
+    if(!email||!pass)return aerr(t('fillAll'));
+    await fbSign('signInWithPassword',email,pass);
+    const u=await loadUser(AUTH.uid);if(!u)return aerr('التسجيل غير مكتمل: اضغط "حساب جديد" وأدخل نفس البريد وكلمة السر لإكماله');
+    S.user=u;enter();
+  }catch(e){aerr(authErr(String(e.message||e)))}
+}
+async function logout(){try{if(D.online)await goOffline()}catch(e){}localStorage.removeItem('fbref');localStorage.removeItem('drvTrip');localStorage.removeItem('activeReq');location.reload()}
+
+/* =====================  الدخول للتطبيق والخريطة  ===================== */
+async function enter(){
+  $('#auth').hidden=true;$('#main').hidden=false;closeModal();
+  initMap();renderTop();startGeo();
+  // استرجاع مشوار قيد التنفيذ
+  try{
+    const sv=JSON.parse(localStorage.getItem('drvTrip')||'null');
+    if(sv&&sv.u===S.user.id){const q=await DB.get('requests/'+sv.req);if(q&&['accepted','arrived','started'].includes(q.status)){D.req=sv.req;D.phase=sv.phase;D.meter=sv.meter;D.q=q;D.online=true;S.mode='drive';restoreDrvMap(q)}}
+    const ar=localStorage.getItem('activeReq');if(ar&&S.mode==='ride'){S.rider.req=ar;S.rider.phase='wait'}
+  }catch(e){}
+  if(!S.user.isDriver)S.mode='ride';
+  renderTop();renderSheet();
+  if(S.user.isDriver)loadStats();
+  if(!S.nav)navModal();
+  if(location.hash==='#admin')DB.get('admins/'+S.user.id).then(v=>{if(v)adminShow();else toast('⛔ غير مصرح')}).catch(()=>toast('⛔ غير مصرح'));
+  clearInterval(enter.iv);enter.iv=setInterval(tick,3000);
+}
+function initMap(){
+  if(M.map)return;
+  M.map=L.map('map',{zoomControl:false,minZoom:C.minZ,maxBounds:L.latLngBounds(C.b[0],C.b[1]).pad(.2),maxBoundsViscosity:.9}).setView(C.center,C.zoom);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(M.map);
+  L.control.zoom({position:'bottomleft'}).addTo(M.map);
+  M.drv=L.layerGroup().addTo(M.map);
+  M.map.on('click',e=>{if(S.mode==='ride'&&S.rider.phase==='plan')mapPick(e.latlng)});
+}
+const IC=(h,c='',s=34)=>L.divIcon({className:'',html:`<div class="mk ${c}">${h}</div>`,iconSize:[s,s],iconAnchor:[s/2,s/2]});
+function setMk(n,p,icon){if(!M.map)return;if(M.mk[n])M.mk[n].setLatLng(p).setIcon(icon);else M.mk[n]=L.marker(p,{icon}).addTo(M.map)}
+function rmMk(n){if(M.mk[n]){M.map.removeLayer(M.mk[n]);delete M.mk[n]}}
+function drawRoute(g){if(M.route)M.map.removeLayer(M.route);M.route=L.polyline(g,{color:'#8A1538',weight:5,opacity:.85}).addTo(M.map)}
+function clearMap(){['pick','dst','car','riderpos'].forEach(rmMk);if(M.route){M.map.removeLayer(M.route);M.route=null}M.drv.clearLayers()}
+function fit(pts){if(!pts.length)return;const h=$('#sheet').offsetHeight;M.map.fitBounds(L.latLngBounds(pts),{paddingTopLeft:[30,70],paddingBottomRight:[30,h+20],maxZoom:16})}
+async function route(a,b){
+  try{const c=new AbortController();setTimeout(()=>c.abort(),8000);
+    const j=await(await fetch(`https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson&alternatives=true`,{signal:c.signal})).json();
+    if(j.routes&&j.routes[0]){const x=j.routes.reduce((m,r)=>r.distance<m.distance?r:m,j.routes[0]);/*أقصر طريق*/return{km:x.distance/1000,min:Math.max(1,Math.round(x.duration/60)),geom:x.geometry.coordinates.map(c=>[c[1],c[0]]),approx:false}}
+  }catch(e){}
+  const km=hav(a,b)*1.3;return{km,min:Math.max(1,Math.round(km/40*60)),geom:[[a.lat,a.lng],[b.lat,b.lng]],approx:true};
+}
+async function rev(lat,lng){try{const j=await(await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&accept-language=${lang}&lat=${lat}&lon=${lng}`)).json();return shortName(j.display_name)||ll(lat,lng)}catch(e){return ll(lat,lng)}}
+
+/* ---- ملاحة خارجية ---- */
+function navModal(){
+  const o=[['here','navHere','🗺️'],['google','navGoogle','📍'],['waze','navWaze','🚙'],['petal','navPetal','🧭']];
+  openModal(`<h3 class="c">${t('navTitle')}</h3><p class="c mut sm">${t('navHint')}</p>`+o.map(x=>`<button class="btn ${S.nav===x[0]?'':'o'}" onclick="setNav('${x[0]}')">${x[2]} ${t(x[1])}</button>`).join(''));
+}
+function setNav(n){S.nav=n;localStorage.setItem('nav',n);closeModal();renderNavChip()}
+function renderNavChip(){const m={here:'navHere',google:'navGoogle',waze:'navWaze',petal:'navPetal'};const e=$('#navchip');e.textContent='🧭 '+t(m[S.nav||'here']);e.onclick=navModal}
+function countryModal(){
+  openModal(`<h3 class="c">${t('country')}</h3>`+Object.keys(COUNTRIES).map(k=>`<button class="btn ${C.code===k?'':'o'}" onclick="setCountry('${k}')">${COUNTRIES[k].flag} ${cname(k)}</button>`).join(''));
+}
+function tripActive(){return !!D.req&&D.phase!=='ended'||(!!S.rider.req&&['wait','active'].includes(S.rider.phase))}
+async function setCountry(k,silent){
+  if(!COUNTRIES[k])return;
+  if(k===C.code&&localStorage.getItem('cc')===k){closeModal();return}
+  if(S.user&&tripActive()){if(!silent)toast(t('busyTrip'));return}
+  if(S.user&&D.online)await goOffline();
+  CC=k;C=COUNTRIES[k];try{localStorage.setItem('cc',k)}catch(e){}
+  closeModal();
+  if(M.map){M.map.setMinZoom(C.minZ);M.map.setMaxBounds(L.latLngBounds(C.b[0],C.b[1]).pad(.2));M.map.setView(C.center,C.zoom);M.centered=false;clearMap()}
+  if(!S.user){authView();return}
+  const r=S.rider;Object.assign(r,{pickup:null,dest:null,route:null,qtext:'',sel:null,drivers:[]});
+  if(S.mode==='ride')riderReset();
+  renderTop();renderSheet();if(S.user.isDriver)loadStats();
+  if(S.pos)onPos();
+}
+function offerSwitch(g){
+  openModal(`<h3 class="c">${COUNTRIES[g].flag} ${t('detectQ')}: ${cname(g)}</h3><button class="btn" onclick="setCountry('${g}')">${t('switchTo')} ${cname(g)}</button><button class="btn o" onclick="closeModal()">${t('stay')}</button>`);
+}
+function openNav(lat,lng){
+  const n=S.nav;if(!n||n==='here')return;
+  if(n==='google')window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,'_blank');
+  else if(n==='waze')window.open(`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,'_blank');
+  else if(n==='petal')window.open(`https://www.petalmaps.com/navigation/?daddr=${lat},${lng}&type=drive&coordinateType=0&utm_source=mishwar`,'_blank');   // الرابط الرسمي لـ Petal Maps
+}
+function freshPos(){return new Promise(res=>{if(!navigator.geolocation)return res(null);navigator.geolocation.getCurrentPosition(g=>{S.pos={lat:g.coords.latitude,lng:g.coords.longitude,acc:g.coords.accuracy,ts:Date.now()};res(S.pos)},()=>res(null),{enableHighAccuracy:true,timeout:2500,maximumAge:5000})})}
+
+/* =====================  GPS  ===================== */
+function startGeo(){
+  if(!navigator.geolocation||startGeo.on)return;startGeo.on=true;
+  navigator.geolocation.watchPosition(p=>{
+    S.pos={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy,ts:Date.now()};onPos();
+  },()=>{},{enableHighAccuracy:true,maximumAge:2000,timeout:20000});
+}
+function onPos(){
+  const p=S.pos;
+  const g=guessCC(p.lat,p.lng);
+  if(g&&g!==C.code&&!tripActive()){
+    if(!localStorage.getItem('cc'))setCountry(g,true);                      // أول مرة: اختر دولة موقعك تلقائياً
+    else if(S.user&&!S.askedCC&&$('#modal').hidden){S.askedCC=1;offerSwitch(g)}   // اختار دولة سابقاً وهو الآن في دولة أخرى: اسأله مرة
+  }setMk('me',[p.lat,p.lng],IC('','me',18));
+  if(!M.centered&&inQ(p.lat,p.lng)){M.centered=true;M.map.setView([p.lat,p.lng],14)}
+  const r=S.rider;
+  if(S.mode==='ride'&&r.phase==='plan'&&!r.pickup&&inQ(p.lat,p.lng))setPoint('pickup',p.lat,p.lng);
+  if(D.phase==='started')meterTick(p);
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(D.phase==='started')wake();if(S.user){freshPos().then(p=>{if(p)onPos()});tick()}});
+let WL=null;async function wake(){try{if(navigator.wakeLock)WL=await navigator.wakeLock.request('screen')}catch(e){}}
+function unwake(){try{WL&&WL.release()}catch(e){}WL=null}
+
+/* =====================  الواجهة العامة  ===================== */
+function renderTop(){
+  const u=S.user;
+  $('#top').innerHTML=`<div class="logo">🚖 <span>${t('app')}</span></div>
+  ${u.isDriver?`<div class="mode"><button class="${S.mode==='ride'?'on':''}" onclick="setMode('ride')">${t('ride')}</button><button class="${S.mode==='drive'?'on':''}" onclick="setMode('drive')">${t('drive')}</button></div>`:''}
+  <span style="flex:1"></span>
+  <button class="av" title="${t('country')}" style="font-size:21px;line-height:34px" onclick="countryModal()">${C.flag}</button>
+  <select onchange="setLang(this.value)">${[['ar','العربية'],['en','English'],['hi','हिन्दी'],['ur','اردو']].map(x=>`<option value="${x[0]}" ${lang===x[0]?'selected':''}>${x[1]}</option>`).join('')}</select>
+  <button class="av" onclick="profileView()"><img src="${u.photo||PH}"></button>`;
+  renderNavChip();
+}
+function renderSheet(){S.mode==='ride'?riderSheet():drvSheet()}
+async function setMode(m){
+  if(m===S.mode)return;
+  if(D.req&&D.phase!=='ended'){toast(t('busyTrip'));return}
+  if(S.mode==='drive'&&D.online)await goOffline();
+  if(D.phase==='ended')resetDrv(true);
+  S.mode=m;clearMap();
+  if(m==='ride'){riderReset(true)}else{D.phase='idle';loadStats()}
+  renderTop();renderSheet();
+}
+function openModal(h){const m=$('#modal');m.innerHTML=`<div class="mbox">${h}</div>`;m.hidden=false;m.onclick=e=>{if(e.target===m)closeModal()}}
+function closeModal(){$('#modal').hidden=true}
+let busyTick=false;
+async function tick(){
+  if(busyTick||!S.user)return;busyTick=true;
+  try{if(S.user.isDriver&&(D.online||D.req))await driverTick();if(S.mode==='ride')await riderTick()}catch(e){console.warn(e)}
+  busyTick=false;
+}
+
+/* =====================  الراكب  ===================== */
+function riderReset(keep){
+  const r=S.rider;localStorage.removeItem('activeReq');
+  Object.assign(r,{phase:'plan',req:null,q:null,route:null,dest:null,qtext:'',stars:0,sel:null,drivers:[],sig:'',pickMode:null});
+  if(!keep)clearMap();else clearMap();
+  r.pickup=null;if(S.pos&&inQ(S.pos.lat,S.pos.lng))setPoint('pickup',S.pos.lat,S.pos.lng);
+  $('#pickb').hidden=true;
+}
+function riderSheet(){
+  const r=S.rider,el=$('#sheet');
+  if(r.phase==='plan'){
+    el.innerHTML=`<div class="grab"></div>
+    <div class="fld"><span class="d g"></span><div class="fv" id="pk">${esc(r.pickup?r.pickup.name:t('pickup')+' — '+t('tapMap'))}</div><button class="ib" title="${t('myLoc')}" onclick="useMyLoc()">📍</button><button class="ib" title="${t('pickMap')}" onclick="pickMode('pickup')">🗺️</button></div>
+    <div class="fld"><span class="d r"></span><input id="q" autocomplete="off" placeholder="${t('search')}" value="${esc(r.qtext)}" oninput="onQ(this.value)"><button class="ib" title="${t('pickMap')}" onclick="pickMode('dest')">🗺️</button></div>
+    <div id="res"></div><div id="plan"></div>`;
+    renderPlan();return;
+  }
+  const q=r.q;
+  if(r.phase==='wait'){
+    el.innerHTML=`<div class="grab"></div><div class="spin"></div><h3 class="c">${t('waiting')}</h3><button class="btn o" onclick="cancelReq()">${t('cancel')}</button>`;return;
+  }
+  if(r.phase==='declined'){
+    el.innerHTML=`<div class="grab"></div><h3 class="c">⚠️ ${t('declined')}</h3><button class="btn" onclick="riderBack()">${t('back')}</button>`;return;
+  }
+  if(!q){el.innerHTML='';return}
+  if(r.phase==='active'){
+    const st={accepted:'accepted',arrived:'arrived',started:'started'}[q.status];
+    el.innerHTML=`<div class="grab"></div><h3 class="c">${t(st)}</h3>
+    <div class="box row" style="align-items:center"><img class="pimg" data-uid="${esc(q.driverId)}" src="${photoCache[q.driverId]||PH}">
+      <div style="flex:1"><b>${esc(q.driverName)}</b><div class="mut sm" id="drat"></div><div>${esc(q.model||'')} <span class="plate">${esc(q.plate||'')}</span></div></div></div>
+    <div class="row"><a class="btn s" style="flex:1;background:var(--ok);text-decoration:none" href="tel:+${esc(q.driverPhone)}">📞 ${t('call')}</a><a class="btn s wa" style="flex:1;text-decoration:none" target="_blank" href="${waLink(q.driverPhone,'')}">💬 ${t('whatsapp')}</a></div>
+    ${q.status==='started'?`<div class="box"><div class="c mut sm">${t('meter')}</div><div class="meter" id="lf">${money(q.fare||q.estFare)} ${t('qar')}</div><div class="c mut sm" id="lk">${(q.meterKm||0).toFixed(2)} ${t('km')}</div><div class="c mut sm" style="margin-top:6px">${t('shortNote')}</div></div>`:`<div class="box c">${t('fare')}: <b>${money(q.estFare)} ${t('qar')}</b> · ${t('cashOnly')}</div>`}
+    ${q.status!=='started'?`<button class="btn o" onclick="cancelReq()">${t('cancel')}</button>`:''}`;
+    loadDrvInfo(q.driverId);return;
+  }
+  if(r.phase==='done'){
+    el.innerHTML=`<div class="grab"></div><h3 class="c">🎉 ${t('done')}</h3>
+    <div class="box c"><div class="mut">${t('payCash')}</div><div class="meter">${money(q.fare)} ${t('qar')}</div><div class="mut sm">${(+q.km||0).toFixed(2)} ${t('km')}</div></div>
+    <h4 class="c">${t('rate')}</h4><div class="stars" id="stars">${[1,2,3,4,5].map(i=>`<span data-i="${i}" class="${r.stars>=i?'on':''}" onclick="setStar(${i})">★</span>`).join('')}</div>
+    <button class="btn" onclick="submitRating()">${r.stars?t('submit'):t('skip')}</button>`;
+  }
+}
+async function loadDrvInfo(id){
+  const u={rSum:await DB.get('profiles/'+id+'/rSum'),rCount:await DB.get('profiles/'+id+'/rCount')};const e=$('#drat');if(e)e.textContent=starsTxt(u);
+  getPhoto(id).then(s=>document.querySelectorAll(`img[data-uid="${CSS.escape(id)}"]`).forEach(i=>i.src=s));
+}
+async function getPhoto(id){if(photoCache[id])return photoCache[id];try{const p=await DB.get('profiles/'+id+'/photo');photoCache[id]=p||PH}catch(e){photoCache[id]=PH}return photoCache[id]}
+function renderPlan(){
+  const el=$('#plan');if(!el)return;const r=S.rider;
+  if(!r.pickup||!r.dest){el.innerHTML=`<p class="c mut sm">${t('tapMap')}</p>`;return}
+  if(r.loading){el.innerHTML='<div class="spin"></div>';return}
+  if(!r.route){el.innerHTML='';return}
+  el.innerHTML=`<div class="row"><div class="kpi"><b>${r.route.km.toFixed(1)}</b>${t('km')}</div><div class="kpi"><b>${r.route.min}</b>${t('min')}</div><div class="kpi"><b>${r.route.approx?'≈':''}${money(r.fare)}</b>${t('qar')}</div></div>
+  <p class="c sm mut" style="margin:6px 0">💵 ${t('cashOnly')}</p><div id="drv"></div>`;
+  renderDrivers();
+}
+function renderDrivers(){
+  const el=$('#drv');if(!el)return;const r=S.rider;if(!r.route){el.innerHTML='';return}
+  let h=`<h4>${t('nearby')}</h4>`;
+  if(!r.drivers.length)h+=`<p class="c mut sm">${t('noDrivers')}</p>`;
+  else h+=r.drivers.map(d=>`<div class="drv ${d.id===r.sel?'sel':''}" onclick="selDrv('${esc(d.id)}')"><img data-uid="${esc(d.id)}" src="${photoCache[d.id]||PH}"><div style="flex:1;min-width:0"><b>${esc(d.name)}</b><div class="mut sm">${d.rc?'★ '+(+d.rating).toFixed(1)+' ('+d.rc+')':t('newRider')}</div><div class="mut sm">${esc(d.model||'')} · ${esc(d.plate||'')}</div></div><div class="c"><b>${d.dist.toFixed(1)} ${t('km')}</b><div class="mut sm">~${Math.max(1,Math.round(d.dist/35*60))} ${t('min')}</div></div></div>`).join('');
+  h+=`<button class="btn" ${r.sel?'':'disabled'} onclick="sendRequest()">${t('request')} · ${money(r.fare)} ${t('qar')}</button>`;
+  el.innerHTML=h;
+  r.drivers.forEach(d=>{if(!photoCache[d.id])getPhoto(d.id).then(s=>document.querySelectorAll(`img[data-uid="${CSS.escape(d.id)}"]`).forEach(i=>i.src=s))});
+}
+function selDrv(id){S.rider.sel=id;renderDrivers()}
+function drawDriverMarkers(){
+  M.drv.clearLayers();
+  S.rider.drivers.forEach(d=>{L.marker([d.lat,d.lng],{icon:IC('🚖','car')}).on('click',()=>selDrv(d.id)).addTo(M.drv)});
+}
+let qT;
+function onQ(v){S.rider.qtext=v;clearTimeout(qT);if(v.trim().length<2){$('#res').innerHTML='';return}qT=setTimeout(()=>doSearch(v.trim()),500)}
+async function doSearch(v){
+  try{
+    const j=await(await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&countrycodes=${C.code}&accept-language=${lang}&q=${encodeURIComponent(v)}`)).json();
+    S.rider.results=j;const e=$('#res');if(e)e.innerHTML=j.map((x,i)=>`<div class="rs" onclick="pickRes(${i})">📍 ${esc(shortName(x.display_name))}</div>`).join('');
+  }catch(e){}
+}
+function pickRes(i){const x=S.rider.results[i];if(!x)return;const n=shortName(x.display_name);S.rider.qtext=n;$('#res').innerHTML='';$('#q').value=n;setPoint('dest',+x.lat,+x.lon,n);M.map.setView([+x.lat,+x.lon],15)}
+function pickMode(w){S.rider.pickMode=w;const b=$('#pickb');b.hidden=false;b.textContent='👆 '+t('tapMap')}
+function mapPick(p){
+  if(!inQ(p.lat,p.lng))return toast(t('outQatar'));
+  const r=S.rider,w=r.pickMode||'dest';r.pickMode=null;$('#pickb').hidden=true;setPoint(w,p.lat,p.lng);
+}
+function useMyLoc(){if(S.pos&&inQ(S.pos.lat,S.pos.lng)){setPoint('pickup',S.pos.lat,S.pos.lng);M.map.setView([S.pos.lat,S.pos.lng],15)}else toast(t('noGps'))}
+async function setPoint(w,lat,lng,name){
+  const r=S.rider;r[w]={lat,lng,name:name||'…'};drawPts();refreshFields();
+  if(!name){const n=await rev(lat,lng);if(r[w]&&r[w].lat===lat&&r[w].lng===lng){r[w].name=n;if(w==='dest')r.qtext=n;refreshFields()}}
+  if(r.pickup&&r.dest&&r.phase==='plan')computeRoute();
+}
+function refreshFields(){
+  const r=S.rider,pk=$('#pk');if(pk)pk.textContent=r.pickup?r.pickup.name:t('pickup')+' — '+t('tapMap');
+  const q=$('#q');if(q&&document.activeElement!==q&&r.dest)q.value=r.dest.name;
+}
+function drawPts(){const r=S.rider;r.pickup?setMk('pick',[r.pickup.lat,r.pickup.lng],IC('🟢','pk')):rmMk('pick');r.dest?setMk('dst',[r.dest.lat,r.dest.lng],IC('🏁','ds')):rmMk('dst')}
+async function computeRoute(){
+  const r=S.rider;r.loading=true;r.route=null;renderPlan();
+  const a=r.pickup,b=r.dest,x=await route(a,b);
+  if(r.pickup!==a||r.dest!==b)return;
+  r.loading=false;r.route=x;r.fare=calcFare(x.km);drawRoute(x.geom);renderPlan();fit([[a.lat,a.lng],[b.lat,b.lng]]);fetchDrivers();
+}
+async function fetchDrivers(){
+  const r=S.rider;if(!r.pickup||!r.route)return;
+  const all=(await DB.get('drivers'))||{},now=Date.now();
+  r.drivers=Object.entries(all).map(([id,d])=>({...d,id})).filter(d=>d.online&&!d.busy&&d.lat&&now-d.ts<60000&&d.id!==S.user.id).map(d=>({...d,dist:hav(r.pickup,d)})).filter(d=>d.dist<=CFG.RADIUS_KM).sort((a,b)=>a.dist-b.dist).slice(0,8);
+  if(r.sel&&!r.drivers.find(d=>d.id===r.sel))r.sel=null;
+  if(!r.sel&&r.drivers[0])r.sel=r.drivers[0].id;
+  drawDriverMarkers();renderDrivers();
+}
+async function sendRequest(){
+  const r=S.rider,d=r.drivers.find(x=>x.id===r.sel);if(!d||!r.route)return;
+  try{
+    const fresh=await DB.get('drivers/'+d.id);if(!fresh||fresh.busy||!fresh.online){toast(t('declined'));return fetchDrivers()}
+    const id=uid8(),u=S.user;
+    const q={id,riderId:u.id,riderName:u.name,riderPhone:u.phone,driverId:d.id,pickup:r.pickup,dest:r.dest,km:+r.route.km.toFixed(2),min:r.route.min,estFare:r.fare,status:'pending',pay:'cash',createdAt:Date.now()};
+    await DB.set('requests/'+id,q);await DB.set('driverReq/'+d.id,id);
+    r.req=id;r.q=q;r.phase='wait';localStorage.setItem('activeReq',id);r.sig='';riderSheet();
+  }catch(e){toast(t('netErr'))}
+}
+async function cancelReq(){
+  const r=S.rider;try{if(r.req)await DB.patch('requests/'+r.req,{status:'cancelled',by:'rider'})}catch(e){}
+  riderBack();
+}
+function riderBack(){const r=S.rider;const p=r.pickup,d=r.dest,rt=r.route,f=r.fare;localStorage.removeItem('activeReq');Object.assign(r,{phase:'plan',req:null,q:null,sig:'',sel:null});M.drv.rmMk;rmMk('car');riderSheet();if(p&&d&&rt){r.route=rt;r.fare=f;renderPlan();drawRoute(rt.geom);fetchDrivers()}}
+function setRPhase(p,q){
+  const r=S.rider;r.q=q;const sig=p+'|'+(q?q.status:'');
+  if(r.sig!==sig){r.sig=sig;r.phase=p;riderSheet();if(p==='active'){if(q.status==='accepted'||q.status==='arrived')fit([[q.pickup.lat,q.pickup.lng],...(q.dLat?[[q.dLat,q.dLng]]:[])]);if(q.status==='arrived')beep()}}
+}
+async function riderTick(){
+  const r=S.rider;
+  if(r.phase==='plan'){await fetchDrivers();return}
+  if(!r.req||r.phase==='done'||r.phase==='declined')return;
+  const q=await DB.get('requests/'+r.req);if(!q){riderBack();return}
+  if(q.status==='pending'){
+    if(Date.now()-q.createdAt>CFG.REQ_TIMEOUT*1000){await DB.patch('requests/'+q.id,{status:'expired'});localStorage.removeItem('activeReq');setRPhase('declined',q)}
+    else r.q=q;return;
+  }
+  if(['declined','expired','cancelled'].includes(q.status)){localStorage.removeItem('activeReq');setRPhase('declined',q);return}
+  if(['accepted','arrived','started'].includes(q.status)){
+    setRPhase('active',q);
+    if(q.dLat){setMk('car',[q.dLat,q.dLng],IC('🚖','car'));M.drv.clearLayers()}
+    if(q.status==='started'){const a=$('#lf'),b=$('#lk');if(a)a.textContent=money(q.fare||q.estFare)+' '+t('qar');if(b)b.textContent=(q.meterKm||0).toFixed(2)+' '+t('km')}
+    return;
+  }
+  if(q.status==='completed'){localStorage.removeItem('activeReq');setRPhase('done',q)}
+}
+function setStar(n){S.rider.stars=n;riderSheet()}
+async function submitRating(){
+  const r=S.rider,q=r.q;
+  try{
+    if(r.stars&&q){
+      const did=q.driverId;
+      await DB.set(`ratings/${did}/${q.id}`,{s:r.stars,by:S.user.id,ts:Date.now()});
+      const sum=((await DB.get('profiles/'+did+'/rSum'))||0)+r.stars,cnt=((await DB.get('profiles/'+did+'/rCount'))||0)+1;
+      await DB.patch('profiles/'+did,{rSum:sum,rCount:cnt});
+      await DB.patch('drivers/'+did,{rating:+(sum/cnt).toFixed(2),rc:cnt});
+    }
+  }catch(e){toast(t('netErr'))}
+  riderReset();riderSheet();
+}
+
+/* =====================  السائق  ===================== */
+function saveDrv(){try{localStorage.setItem('drvTrip',JSON.stringify(D.req&&D.phase!=='ended'?{u:S.user.id,req:D.req,phase:D.phase,meter:D.meter}:null))}catch(e){}}
+async function pushLoc(extra){
+  if(!D.online||!S.pos)return;const u=S.user;
+  await DB.patch('drivers/'+u.id,{lat:S.pos.lat,lng:S.pos.lng,ts:Date.now(),online:true,busy:!!D.req,name:u.name,plate:u.plate||'',model:u.model||'',...(extra||{})});
+}
+async function goOnline(){
+  if(!S.pos){toast(t('noGps'));return}
+  if(!inQ(S.pos.lat,S.pos.lng)){toast(t('outQatar'));return}
+  D.online=true;await pushLoc();M.map.setView([S.pos.lat,S.pos.lng],14);drvSheet();
+}
+async function goOffline(){D.online=false;try{await DB.patch('drivers/'+S.user.id,{online:false,busy:false});await DB.del('driverReq/'+S.user.id)}catch(e){}if(S.mode==='drive')drvSheet()}
+function resetDrv(silent){
+  D.req=null;D.q=null;D.inc=null;D.meter=null;D.phase='idle';D.sig='';D.trip=null;saveDrv();unwake();clearMap();
+  if(D.online)pushLoc({busy:false});
+  if(!silent){drvSheet();loadStats()}
+}
+async function loadStats(){
+  if(!S.user||!S.user.isDriver)return;
+  try{
+    const tr=Object.values((await DB.get('trips/'+S.user.id))||{}),ws=weekStart().getTime(),wk=tr.filter(x=>x.ts>=ws);
+    D.stats={wkN:wk.length,wkEarn:sumCur(wk,'fare'),due:sumCur(tr.filter(x=>!x.settled),'comm'),prevDue:sumCur(tr.filter(x=>!x.settled&&x.ts<ws),'comm'),unrep:tr.filter(x=>!x.reported)};
+    const[a,b]=await Promise.all([DB.get('profiles/'+S.user.id+'/rSum'),DB.get('profiles/'+S.user.id+'/rCount')]);S.user.rSum=a||0;S.user.rCount=b||0;
+    if(S.mode==='drive'&&D.phase==='idle')drvSheet();
+    weeklyCheck();
+  }catch(e){}
+}
+function weekKey(){return weekStart().toISOString().slice(0,10)}
+function weeklyMsg(u,due,n,earn){
+  return `📊 تقرير نهاية الأسبوع\nاسم السائق: ${u.name}\nالبريد المسجل: ${u.email}\nواتساب السائق: +${u.phone}\nعدد المشاوير هذا الأسبوع: ${n}\nإجمالي المكتسب: ${fmtCur(earn,true)}\nالعمولة المطلوبة (15%): ${fmtCur(due,true)}\nأرجو إرسال طريقة الدفع.`;
+}
+// أول فتح للتطبيق في كل أسبوع جديد (يبدأ السبت): يظهر للسائق تقرير الأسبوع ليرسله للمدير
+function weeklyCheck(){
+  const st=D.stats,u=S.user,wk=weekKey(),today=new Date().toISOString().slice(0,10);
+  if(st&&anyPos(st.due)&&(anyPos(st.prevDue)||new Date().getDay()===5)&&localStorage.getItem('wrep_'+u.id)!==wk&&localStorage.getItem('remd_'+u.id)!==today&&$('#modal').hidden){
+    localStorage.setItem('remd_'+u.id,today);
+    openModal(`<h3 class="c">🔔 ${t('weekEnd')}</h3><p class="c mut sm">${t('weekly')}</p><div class="box">👤 ${esc(u.name)}<br>✉️ ${esc(u.email)}<br>💬 +${esc(u.phone)}</div><div class="due"><div>${t('due')}</div><b>${fmtCur(st.due)}</b></div><button class="btn wa" onclick="sendWeekly()">💬 ${t('weekSend')}</button><button class="btn o" onclick="closeModal()">${t('later')}</button>`);
+  }
+}
+function sendWeekly(){
+  const st=D.stats||{due:{},wkN:0,wkEarn:{}};
+  localStorage.setItem('wrep_'+S.user.id,weekKey());closeModal();
+  window.open(waLink(CFG.ADMIN_WA,weeklyMsg(S.user,st.due,st.wkN,st.wkEarn)),'_blank');
+}
+function payComm(){
+  const st=D.stats||{due:{},wkN:0,wkEarn:{}};
+  window.open(waLink(CFG.ADMIN_WA,weeklyMsg(S.user,st.due,st.wkN,st.wkEarn)),'_blank');
+}
+function reportTrip(tr){
+  const d=new Date(tr.ts).toLocaleString('ar-QA');
+  const m=`✅ توصيلة ناجحة\nرقم المشوار: ${tr.id}\nالسائق: ${tr.dName}\nواتساب السائق: +${tr.dPhone}\nالراكب: ${tr.rName} (+${tr.rPhone})\nمن: ${tr.from}\nإلى: ${tr.to}\nالمسافة: ${tr.km} كم\nالدولة: ${(COUNTRIES[tr.cc]||COUNTRIES.qa).name.ar}\nالمبلغ المكتسب: ${money(tr.fare)} ${curL(tr.cur,true)} (نقداً)\nعمولة 15%: ${money(tr.comm)} ${curL(tr.cur,true)}\nالوقت: ${d}`;
+  const w=window.open(waLink(CFG.ADMIN_WA,m),'_blank');
+  DB.patch(`trips/${S.user.id}/${tr.id}`,{reported:true}).catch(()=>{});
+  return w;
+}
+async function sendReport(id){
+  try{const tr=await DB.get(`trips/${S.user.id}/${id}`);if(tr){reportTrip(tr);setTimeout(loadStats,1500)}}catch(e){}
+}
+function drvSheet(){
+  const el=$('#sheet'),u=S.user;
+  if(D.phase==='idle'){
+    const st=D.stats||{wkN:0,wkEarn:{},due:{},unrep:[]};
+    el.innerHTML=`<div class="grab"></div>
+    <div class="row" style="align-items:center;margin-bottom:8px"><img class="pimg" src="${u.photo||PH}"><div style="flex:1"><b>${esc(u.name)}</b><div class="mut sm">${starsTxt(u)}</div><div class="mut sm">${esc(u.model||'')} <span class="plate">${esc(u.plate||'')}</span></div></div><span class="pill ${D.online?'on':''}">${D.online?t('online'):t('offline')}</span></div>
+    ${D.online?`<p class="c mut"><span class="spin" style="display:block;width:22px;height:22px;border-width:3px;margin:4px auto"></span>${t('waitReq')}</p>`:''}
+    <button class="btn ${D.online?'r':'g'}" onclick="${D.online?'goOffline()':'goOnline()'}">${D.online?t('goOffline'):t('goOnline')}</button>
+    <h4>${t('weekTitle')}</h4>
+    <div class="row"><div class="kpi"><b>${st.wkN}</b>${t('trips')}</div><div class="kpi"><b style="font-size:15px">${fmtCur(st.wkEarn)}</b>${t('earned')}</div></div>
+    <div class="due"><div>${t('due')}<div class="sm mut">${t('commission')}</div></div><b>${fmtCur(st.due)}</b></div>
+    <button class="btn wa" onclick="payComm()">💬 ${t('payComm')}</button>
+    ${st.unrep.length?`<h4>${t('unrep')}</h4>`+st.unrep.slice(0,5).map(x=>`<button class="btn o s" style="margin:3px 0" onclick="sendReport('${x.id}')">📨 ${money(x.fare)} ${t('qar')} · ${new Date(x.ts).toLocaleDateString()}</button>`).join(''):''}`;
+    return;
+  }
+  if(D.phase==='incoming'){
+    const q=D.inc,dm=S.pos?hav(S.pos,q.pickup):0;
+    el.innerHTML=`<div class="grab"></div><h3 class="c">🔔 ${t('newReq')}</h3>
+    <div class="box">👤 ${esc(q.riderName)}<br>🟢 ${esc(q.pickup.name)}<br>🏁 ${esc(q.dest.name)}</div>
+    <div class="row"><div class="kpi"><b>${dm.toFixed(1)}</b>${t('km')} (${t('pickup')})</div><div class="kpi"><b>${q.km}</b>${t('km')}</div><div class="kpi"><b>${money(q.estFare)}</b>${t('qar')}</div></div>
+    <p class="c mut sm">💵 ${t('collect')} · ${t('net')}: ${money(q.estFare*(1-CFG.COMMISSION))} ${t('qar')}</p>
+    <div class="row"><button class="btn r" onclick="declineReq()">${t('decline')}</button><button class="btn g" onclick="acceptReq()">${t('accept')}</button></div>`;
+    return;
+  }
+  const q=D.q;if(!q){el.innerHTML='';return}
+  const rider=`<div class="box">👤 <b>${esc(q.riderName)}</b><br>🟢 ${esc(q.pickup.name)}<br>🏁 ${esc(q.dest.name)}</div>
+   <div class="row"><a class="btn s" style="flex:1;background:var(--ok);text-decoration:none" href="tel:+${esc(q.riderPhone)}">📞 ${t('call')}</a><a class="btn s wa" style="flex:1;text-decoration:none" target="_blank" href="${waLink(q.riderPhone,'')}">💬 ${t('whatsapp')}</a></div>`;
+  if(D.phase==='accepted'){
+    el.innerHTML=`<div class="grab"></div><h3 class="c">${t('toRider')}</h3>${rider}
+    <button class="btn o" onclick="openNav(${q.pickup.lat},${q.pickup.lng})">🧭 ${t('navTo')}</button>
+    <button class="btn" onclick="arrive()">${t('iArrived')}</button><button class="btn o" onclick="drvCancel()">${t('cancel')}</button>`;
+  }else if(D.phase==='arrived'){
+    el.innerHTML=`<div class="grab"></div><h3 class="c">${t('iArrived')} ✔</h3>${rider}
+    <div class="box c">${t('fare')}: <b>${money(q.estFare)} ${t('qar')}</b></div>
+    <button class="btn g" onclick="startTrip()">▶ ${t('startTrip')}</button><button class="btn o" onclick="drvCancel()">${t('cancel')}</button>`;
+  }else if(D.phase==='started'){
+    el.innerHTML=`<div class="grab"></div><div class="c mut sm">${t('meter')}</div><div class="meter" id="mf">0.00</div><div class="c mut" id="mk">0.00 ${t('km')}</div>
+    <div class="box">🏁 ${esc(q.dest.name)}<br>💵 ${t('collect')}</div>
+    <button class="btn o" onclick="openNav(${q.dest.lat},${q.dest.lng})">🧭 ${t('navTo')}</button>
+    <p class="c mut sm">${t('shortNote')}</p><p class="c mut sm">${t('navBg')}</p><button class="btn r" onclick="endTrip()">■ ${t('endTrip')}</button>`;
+    updateMeterUI();
+  }else if(D.phase==='ended'){
+    const tr=D.trip;
+    el.innerHTML=`<div class="grab"></div><h3 class="c">✅ ${t('done')}</h3>
+    <div class="box c"><div class="mut">${t('collect')}</div><div class="meter">${money(tr.fare)} ${t('qar')}</div><div class="mut sm">${tr.km} ${t('km')}</div></div>
+    <div class="row"><div class="kpi"><b>${money(tr.comm)}</b>${t('commission')}</div><div class="kpi"><b>${money(tr.fare-tr.comm)}</b>${t('net')}</div></div>
+    <button class="btn wa" onclick="reportTrip(D.trip)">📨 ${t('reportWa')}</button><button class="btn" onclick="resetDrv()">${t('sent')}</button>`;
+  }
+}
+function updateMeterUI(){
+  if(!D.meter)return;const a=$('#mf'),b=$('#mk');
+  if(a)a.textContent=money(D.q?D.q.estFare:0)+' '+t('qar');if(b)b.textContent=D.meter.km.toFixed(2)+' '+t('km');
+}
+function showIncomingMap(q){
+  clearMap();setMk('pick',[q.pickup.lat,q.pickup.lng],IC('🟢','pk'));setMk('dst',[q.dest.lat,q.dest.lng],IC('🏁','ds'));
+  route(q.pickup,q.dest).then(x=>{if(D.inc&&D.inc.id===q.id)drawRoute(x.geom)});
+  fit([[q.pickup.lat,q.pickup.lng],[q.dest.lat,q.dest.lng],...(S.pos?[[S.pos.lat,S.pos.lng]]:[])]);
+}
+function restoreDrvMap(q){
+  setMk('dst',[q.dest.lat,q.dest.lng],IC('🏁','ds'));if(D.phase!=='started')setMk('pick',[q.pickup.lat,q.pickup.lng],IC('🟢','pk'));
+  if(D.phase==='started')wake();
+}
+async function acceptReq(){
+  const q0=D.inc;if(!q0)return;
+  try{
+    const q=await DB.get('requests/'+q0.id);
+    if(!q||q.status!=='pending'){toast(t('riderCancelled'));D.inc=null;D.phase='idle';clearMap();drvSheet();return}
+    const u=S.user;
+    await DB.patch('requests/'+q.id,{status:'accepted',driverName:u.name,driverPhone:u.phone,plate:u.plate||'',model:u.model||'',acceptedAt:Date.now()});
+    await DB.del('driverReq/'+u.id);
+    D.req=q.id;D.q={...q,status:'accepted'};D.inc=null;D.phase='accepted';saveDrv();pushLoc({busy:true});drvSheet();openNav(q.pickup.lat,q.pickup.lng);
+    clearMap();setMk('pick',[q.pickup.lat,q.pickup.lng],IC('🟢','pk'));
+    if(S.pos){const x=await route(S.pos,q.pickup);drawRoute(x.geom)}
+    fit([[q.pickup.lat,q.pickup.lng],...(S.pos?[[S.pos.lat,S.pos.lng]]:[])]);
+  }catch(e){toast(t('netErr'))}
+}
+async function declineReq(){
+  const q=D.inc;D.inc=null;D.phase='idle';clearMap();drvSheet();
+  try{if(q){await DB.patch('requests/'+q.id,{status:'declined'});await DB.del('driverReq/'+S.user.id)}}catch(e){}
+}
+async function arrive(){D.phase='arrived';saveDrv();drvSheet();try{await DB.patch('requests/'+D.req,{status:'arrived'})}catch(e){}}
+async function drvCancel(){try{await DB.patch('requests/'+D.req,{status:'cancelled',by:'driver'})}catch(e){}resetDrv()}
+async function startTrip(){
+  const q=D.q;
+  D.meter={km:0,last:S.pos?{lat:S.pos.lat,lng:S.pos.lng,ts:Date.now()}:null,samples:0,start:S.pos?{lat:S.pos.lat,lng:S.pos.lng}:{lat:q.pickup.lat,lng:q.pickup.lng}};D.phase='started';saveDrv();wake();
+  clearMap();setMk('dst',[q.dest.lat,q.dest.lng],IC('🏁','ds'));drvSheet();
+  openNav(q.dest.lat,q.dest.lng);               // يفتح Waze / قوقل / Petal إن اخترتها
+  try{await DB.patch('requests/'+D.req,{status:'started',startedAt:Date.now()})}catch(e){}
+  if(S.pos){const x=await route(S.pos,q.dest);drawRoute(x.geom);fit([[S.pos.lat,S.pos.lng],[q.dest.lat,q.dest.lng]])}
+}
+function meterTick(p){
+  const m=D.meter;if(!m)return;if(p.acc&&p.acc>80)return;
+  if(!m.last){m.last={lat:p.lat,lng:p.lng,ts:p.ts};return}
+  const d=hav(m.last,p),dt=(p.ts-m.last.ts)/1000;
+  if(d<0.006&&dt<20)return;                                   // تجاهل اهتزاز GPS
+  if(dt<30&&dt>0&&d/(dt/3600)>220)return;                     // قفزة غير منطقية
+  if(dt>40&&d>0.15){                                          // غاب التطبيق (الملاحة في تطبيق آخر): مسافة الطريق الفعلية بين آخر نقطة والحالية
+    const from=m.last;m.last={lat:p.lat,lng:p.lng,ts:p.ts};m.samples++;m.pending=(m.pending||0)+1;
+    route(from,p).then(x=>{m.km+=x.km;m.pending--;updateMeterUI()}).catch(()=>{m.km+=d*1.3;m.pending--;updateMeterUI()});
+    return;
+  }
+  m.km+=d;
+  m.last={lat:p.lat,lng:p.lng,ts:p.ts};m.samples++;updateMeterUI();
+}
+async function endTrip(){
+  const m=D.meter,q=D.q;
+  const eb=document.querySelector('#sheet .btn.r');if(eb){eb.disabled=true;eb.textContent='…'}
+  const fp=await freshPos();if(fp&&D.phase==='started')meterTick(fp);
+  for(let i=0;i<20&&m.pending>0;i++)await new Promise(r=>setTimeout(r,200));
+  let km=q.km;const end=S.pos;                                 // وصل للوجهة: السعر المتفق عليه (أقصر طريق)
+  if(end&&m.start&&hav(end,q.dest)>0.3)km=(await route(m.start,end)).km;   // أنهى قبل/بعد الوجهة: أقصر طريق بين البداية والنهاية الفعلية
+  km=Math.max(km,0.1);const fare=calcFare(km),comm=+(fare*CFG.COMMISSION).toFixed(2),u=S.user;
+  const tr={id:q.id,ts:Date.now(),fare,comm,km:+km.toFixed(2),kmDriven:+(m.km||0).toFixed(2),rName:q.riderName,rPhone:q.riderPhone,from:q.pickup.name,to:q.dest.name,dName:u.name,dPhone:u.phone,dEmail:u.email,cur:C.cur,cc:C.code,settled:false,reported:false};
+  D.trip=tr;D.phase='ended';saveDrv();unwake();drvSheet();
+  reportTrip(tr);                                             // يفتح واتساب المدير برسالة جاهزة
+  try{
+    await DB.patch('requests/'+q.id,{status:'completed',fare,km:tr.km,endedAt:tr.ts});
+    await DB.set(`trips/${u.id}/${q.id}`,tr);await DB.patch('drivers/'+u.id,{busy:false});
+  }catch(e){toast(t('netErr'))}
+  D.req=null;saveDrv();loadStats();
+}
+async function driverTick(){
+  const u=S.user;await pushLoc();
+  if(D.phase==='ended')return;
+  if(D.req){
+    const q=await DB.get('requests/'+D.req);if(!q){resetDrv();return}D.q=q;
+    if(q.status==='cancelled'){toast(t('riderCancelled'));resetDrv();return}
+    if(S.pos){const x={dLat:S.pos.lat,dLng:S.pos.lng};if(D.phase==='started'&&D.meter){x.meterKm=+D.meter.km.toFixed(3);saveDrv()}await DB.patch('requests/'+D.req,x)}
+    return;
+  }
+  if(D.phase==='incoming'){
+    const q=await DB.get('requests/'+D.inc.id);
+    if(!q||q.status!=='pending'||Date.now()-q.createdAt>CFG.REQ_TIMEOUT*1000){D.inc=null;D.phase='idle';clearMap();drvSheet()}return;
+  }
+  if(D.online&&S.mode==='drive'){
+    const rid=await DB.get('driverReq/'+u.id);if(!rid)return;
+    const q=await DB.get('requests/'+rid);
+    if(q&&q.status==='pending'&&Date.now()-q.createdAt<CFG.REQ_TIMEOUT*1000){D.inc=q;D.phase='incoming';beep();drvSheet();showIncomingMap(q)}
+    else await DB.del('driverReq/'+u.id);
+  }
+}
+
+/* =====================  الملف الشخصي  ===================== */
+let PP={};
+function profileView(){
+  const u=S.user;PP={};
+  openModal(`<h3>${t('profile')}</h3>
+  <div class="ph"><img class="pimg" id="pimg" style="width:64px;height:64px" src="${u.photo||PH}"><label class="btn o s" style="margin:0">${t('changePhoto')}<input type="file" accept="image/*" hidden onchange="profPhoto(this,'photo','pimg')"></label></div>
+  <label>${t('name')}</label><input id="p_name" value="${esc(u.name)}">
+  <label>${u.isDriver?t('phone'):t('phoneRider')}</label><input id="p_phone" dir="ltr" inputmode="tel" value="${esc(u.phone)}">
+  <label>${t('email')}</label><input value="${esc(u.email)}" dir="ltr" disabled>
+  ${u.isDriver?'':`<button class="btn o" id="bd" onclick="$('#dform').hidden=false;this.hidden=true">🚖 ${t('becomeDriver')}</button>`}
+  <div id="dform" ${u.isDriver?'':'hidden'}>
+    <label>${t('plate')}</label><input id="p_plate" dir="ltr" value="${esc(u.plate||'')}">
+    <label>${t('carModel')}</label><input id="p_model" value="${esc(u.model||'')}">
+    <div class="upl"><img class="pv" id="pcimg" src="${u.carPhoto||PH}"><label class="btn o s" style="margin:0">${t('photoCar')}<input type="file" accept="image/*" hidden onchange="profPhoto(this,'carPhoto','pcimg')"></label></div>
+  </div>
+  <div id="perr" class="err"></div>
+  <button class="btn" onclick="saveProfile()">${t('save')}</button>
+  <a class="btn wa" style="text-decoration:none" target="_blank" href="${waLink(CFG.ADMIN_WA,'')}">💬 ${t('contactAdmin')} +${CFG.ADMIN_WA}</a>
+  <button class="btn o" id="adminBtn" hidden onclick="adminShow()">🔐 ${t('admin')}</button>
+  <button class="btn r" onclick="logout()">${t('logout')}</button>`);
+  DB.get('admins/'+u.id).then(v=>{const b=$('#adminBtn');if(v&&b)b.hidden=false}).catch(()=>{});
+}
+async function profPhoto(inp,k,img){if(!inp.files[0])return;PP[k]=await readImg(inp.files[0]);$('#'+img).src=PP[k]}
+async function saveProfile(){
+  const u=S.user,name=$('#p_name').value.trim(),phone=normPhone($('#p_phone').value),perr=m=>$('#perr').textContent=m;
+  if(!name)return perr(t('fillAll'));if(!phone)return perr(t('badPhone'));
+  const p={name,phone};if(PP.photo)p.photo=PP.photo;
+  if(u.isDriver||!$('#dform').hidden){
+    const plate=$('#p_plate').value.trim().toUpperCase(),car=PP.carPhoto||u.carPhoto,me=PP.photo||u.photo;
+    if(!plate||!car||!me)return perr(t('fillAll'));
+    Object.assign(p,{isDriver:true,plate,model:$('#p_model').value.trim(),carPhoto:car});
+  }
+  try{
+    const up={phone:p.phone};if('isDriver' in p)up.isDriver=true;const pp={...p};delete pp.phone;delete pp.isDriver;await DB.patch('users/'+u.id,up);await DB.patch('profiles/'+u.id,pp);Object.assign(S.user,p);photoCache[u.id]=S.user.photo;
+    if(p.isDriver&&D.online)await pushLoc();
+    closeModal();renderTop();renderSheet();if(p.isDriver)loadStats();
+  }catch(e){perr(t('netErr'))}
+}
+
+/* =====================  لوحة المدير  ===================== */
+async function adminShow(){
+  const trips=(await DB.get('trips'))||{};let rows='',tot={},rep='📊 التقرير الأسبوعي لعمولات السائقين (15%)\n';
+  Object.entries(trips).forEach(([did,o])=>{
+    const a=Object.values(o),dueO=sumCur(a.filter(x=>!x.settled),'comm'),has=anyPos(dueO);tot=mergeCur(tot,dueO);const f=a[a.length-1];
+    if(has)rep+=`\n👤 ${f.dName}\n✉️ ${f.dEmail||did.replace(/,/g,'.')}\n💬 +${f.dPhone}\n💰 ${fmtCur(dueO,true)}\n`;
+    rows+=`<div class="box"><b>${esc(f.dName)}</b> · +${esc(f.dPhone)}<br>✉️ ${esc(f.dEmail||did.replace(/,/g,'.'))}<br>${t('trips')}: ${a.length} · ${t('earned')}: ${esc(fmtCur(sumCur(a,'fare')))}<br>${t('due')}: <b style="color:var(--m)">${esc(fmtCur(dueO))}</b>
+    <div class="row" style="margin-top:6px"><a class="btn s wa" style="flex:1;text-decoration:none" target="_blank" href="${waLink(f.dPhone,'تذكير: المطلوب منك عمولة التطبيق 15% بقيمة '+fmtCur(dueO,true)+'. أرجو الدفع.')}">${t('remind')}</a><button class="btn s g" style="flex:1" ${has?'':'disabled'} onclick="settle('${esc(did)}')">${t('settle')}</button></div></div>`;
+  });
+  rep+=`\nالإجمالي المطلوب: ${fmtCur(tot,true)}`;
+  openModal(`<h3>🔐 ${t('admin')}</h3><div class="due"><div>${t('due')}</div><b>${esc(fmtCur(tot))}</b></div><a class="btn wa" style="text-decoration:none" target="_blank" href="${waLink(CFG.ADMIN_WA,rep)}">📊 ${t('adminWeekly')}</a>${rows||`<p class="c mut">${t('noData')}</p>`}`);
+}
+async function settle(did){
+  const o=(await DB.get('trips/'+did))||{},p={};
+  Object.entries(o).forEach(([id,x])=>{if(!x.settled){p[id+'/settled']=true;p[id+'/settledAt']=Date.now()}});
+  await DB.patch('trips/'+did,p);adminShow();
+}
+
+/* =====================  بدء التشغيل  ===================== */
+(async function boot(){
+  applyLang();
+  if(AUTH.ref){
+    try{await fbRefresh();const u=await loadUser(AUTH.uid);if(u){S.user=u;S.mode=u.isDriver&&localStorage.getItem('mode')==='drive'?'drive':'ride';return enter()}}catch(e){}
+  }
+  authView();
+})();
+</script>
+</body>
+</html>
